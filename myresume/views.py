@@ -7,6 +7,7 @@ from django.http import HttpResponseServerError
 from .forms import UploadImageForm
 from gradio_client import Client, handle_file
 from PIL import Image
+import httpx
 
 # Initialize the Gradio client with the correct endpoint URL
 
@@ -28,8 +29,8 @@ def compress_image(image_file, max_size_bytes=2 * 1024 * 1024):
     # Resize the image
     img = img.resize((int(img.width * ratio), int(img.height * ratio)), Image.LANCZOS)
     
-    # Save the image to a temporary file
-    buffer = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg')
+    # Save the image to a temporary buffer
+    buffer = tempfile.NamedTemporaryFile(delete=False)
     img.save(buffer, format='JPEG', quality=85)
     buffer.close()
     
@@ -37,32 +38,19 @@ def compress_image(image_file, max_size_bytes=2 * 1024 * 1024):
 
 def upload_image(request):
     if request.method == 'POST':
-        client = Client("https://eswarkarthikk-object-detection.hf.space")
+        
         form = UploadImageForm(request.POST, request.FILES)
+        client = Client("https://eswarkarthikk-object-detection.hf.space")
         if form.is_valid():
             try:
-                # Create a temporary directory
-                temp_dir = tempfile.mkdtemp()
-
-                # Clear any existing files in the temporary directory
-                for filename in os.listdir(temp_dir):
-                    file_path = os.path.join(temp_dir, filename)
-                    try:
-                        if os.path.isfile(file_path) or os.path.islink(file_path):
-                            os.unlink(file_path)
-                        elif os.path.isdir(file_path):
-                            shutil.rmtree(file_path)
-                    except Exception as e:
-                        print(f"Failed to delete {file_path}. Reason: {e}")
-
                 # Get the uploaded image file
                 image_file = request.FILES['image']
 
                 # Save the uploaded image to a temporary file
-                temp_file_path = os.path.join(temp_dir, 'uploaded_image.jpg')
-                with open(temp_file_path, 'wb') as temp_file:
+                with tempfile.NamedTemporaryFile(delete=False) as temp_file:
                     for chunk in image_file.chunks():
                         temp_file.write(chunk)
+                    temp_file_path = temp_file.name
 
                 # Compress the image before sending to the API
                 compressed_image_path = compress_image(temp_file_path)
@@ -91,8 +79,11 @@ def upload_image(request):
                 return HttpResponseServerError(f"Error: {str(e)}")
 
             finally:
-                # Clean up the temporary directory
-                shutil.rmtree(temp_dir, ignore_errors=True)
+                # Clean up the temporary files
+                if 'temp_file_path' in locals() and os.path.exists(temp_file_path):
+                    os.remove(temp_file_path)
+                if 'compressed_image_path' in locals() and os.path.exists(compressed_image_path):
+                    os.remove(compressed_image_path)
 
     else:
         form = UploadImageForm()
