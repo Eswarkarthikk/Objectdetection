@@ -38,7 +38,6 @@ def compress_image(image_file, max_size_bytes=2 * 1024 * 1024):
 
 def upload_image(request):
     if request.method == 'POST':
-        
         form = UploadImageForm(request.POST, request.FILES)
         client = Client("https://eswarkarthikk-object-detection.hf.space")
         if form.is_valid():
@@ -59,7 +58,9 @@ def upload_image(request):
                 with open(temp_file_path, 'rb') as img_file:
                     original_image_base64 = base64.b64encode(img_file.read()).decode('utf-8')
 
-                result = client.predict(image=handle_file(compressed_image_path))
+                # Example using gradio_client to predict with local file
+                with httpx.Client(timeout=50) as http_client:  # Set a longer timeout if needed
+                    result = client.predict(image=handle_file(compressed_image_path))
 
                 # Check if the result is a file path
                 if isinstance(result, str) and os.path.isfile(result):
