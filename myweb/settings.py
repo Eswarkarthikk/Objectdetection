@@ -132,3 +132,4 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # Example: 10 MB in bytes
 
 # Maximum size (in bytes) that a request's body may be to be read into memory
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # Example: 10 MB in bytes
+# Add these settings to your settings.py
