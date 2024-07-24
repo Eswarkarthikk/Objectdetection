@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uploaded Images</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* General styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+h2 {
+    color: #333333;
+}
+
+img {
+    display: block;
+    margin: 20px auto;
+    max-width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+}
+
+img:hover {
+    transform: scale(1.1);
+}
+
+form {
+    margin-top: 20px;
+    text-align: center;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Original Image</h2>
+        <img id="originalImage" src="{{ original_image_base64 }}" alt="Original Image">
+
+        <h2>Predicted Image</h2>
+        <img id="predictedImage" src="{{ predicted_image_base64 }}" alt="Predicted Image">
+
+        <hr>
+    <form id="uploadForm" method="post" enctype="multipart/form-data" action="{% url 'upload_image' %}">
+        {% csrf_token %}
+        <input type="file" id="imageInput" name="image" accept="image/*" required>
+        <button type="submit">Upload</button>
+    </form>
+    </div>
+
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            var fileInput = document.getElementById('imageInput');
+            if (fileInput.files.length > 0) {
+                var fileSize = fileInput.files[0].size; // Size in bytes
+                var maxSize = 2 * 1024 * 1024; // 2 MB in bytes
+
+                if (fileSize > maxSize) {
+                    alert('File size exceeds 2 MB limit. Please choose a smaller file.');
+                    event.preventDefault(); // Prevent form submission
+                }
+            }
+        });
+    </script>
+</body>
+</html>
