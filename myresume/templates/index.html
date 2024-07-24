@@ -108,8 +108,7 @@
                 });
             }
         });
-   
-        // Display the original image immediately after selection
+
         document.getElementById('imageInput').addEventListener('change', function(event) {
             var file = event.target.files[0];
             if (file) {
@@ -125,6 +124,7 @@
         function pollTaskStatus(taskId) {
             var statusElement = document.getElementById('status');
             statusElement.textContent = 'Processing...';
+            var startTime = Date.now();
 
             function checkStatus() {
                 fetch(`/task_status/${taskId}/`)
@@ -137,6 +137,9 @@
                         } else if (data.status === 'error') {
                             statusElement.textContent = `Error: ${data.message}`;
                         } else if (data.status === 'processing') {
+                            if (Date.now() - startTime > 10000) { // 10 seconds timeout
+                                statusElement.textContent = 'Taking longer than expected...';
+                            }
                             setTimeout(checkStatus, 1000);  // Poll every second
                         }
                     });
