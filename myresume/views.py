@@ -1,5 +1,4 @@
 import os
-import shutil
 import base64
 import tempfile
 from django.shortcuts import render
@@ -8,9 +7,9 @@ from .forms import UploadImageForm
 from gradio_client import Client, handle_file
 from PIL import Image
 import httpx
+import logging
 
-# Initialize the Gradio client with the correct endpoint URL
-
+logger = logging.getLogger(__name__)
 
 def compress_image(image_file, max_size_bytes=2 * 1024 * 1024):
     """Compress image to fit within the specified byte size."""
@@ -30,7 +29,7 @@ def compress_image(image_file, max_size_bytes=2 * 1024 * 1024):
     img = img.resize((int(img.width * ratio), int(img.height * ratio)), Image.LANCZOS)
     
     # Save the image to a temporary buffer
-    buffer = tempfile.NamedTemporaryFile(delete=False)
+    buffer = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg')
     img.save(buffer, format='JPEG', quality=85)
     buffer.close()
     
@@ -59,16 +58,14 @@ def upload_image(request):
                     original_image_base64 = base64.b64encode(img_file.read()).decode('utf-8')
 
                 # Example using gradio_client to predict with local file
-                with httpx.Client(timeout=30) as http_client:  # Set a longer timeout if needed
+                with httpx.Client(timeout=10) as http_client:
                     result = client.predict(image=handle_file(compressed_image_path))
 
                 # Check if the result is a file path
                 if isinstance(result, str) and os.path.isfile(result):
-                    # Read the predicted image and convert to base64
                     with open(result, 'rb') as img_file:
                         predicted_image_base64 = base64.b64encode(img_file.read()).decode('utf-8')
 
-                    # Pass the base64 encoded images to the template
                     return render(request, 'index.html', {
                         'original_image_base64': f"data:image/jpeg;base64,{original_image_base64}",
                         'predicted_image_base64': f"data:image/jpeg;base64,{predicted_image_base64}"
@@ -77,11 +74,12 @@ def upload_image(request):
                     raise ValueError("Unexpected response format from Gradio API")
 
             except Exception as e:
-                return HttpResponseServerError(f"Error: {str(e)}")
+                logger.error(f"Error processing image: {str(e)}")
+                return HttpResponseServerError("An error occurred while processing your image. Please try again.")
 
             finally:
                 # Clean up the temporary files
-                if 'temp_file_path' in locals() and os.path.exists(temp_file_path):
+                if os.path.exists(temp_file_path):
                     os.remove(temp_file_path)
                 if 'compressed_image_path' in locals() and os.path.exists(compressed_image_path):
                     os.remove(compressed_image_path)
