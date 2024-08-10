@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digit Recognition</title>
+    <style>
+        #canvas {
+            border: 1px solid black;
+            background-color: black;
+        }
+        #prediction {
+            font-size: 24px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h2>go to credit card fraud detection: <a href="{% 'predict_fraud' % }"></a></h2>
+    <h1>Draw a Digit</h1>
+    <canvas id="canvas" width="280" height="280"></canvas>
+    <br>
+    <button onclick="predict()">Predict</button>
+    <p id="prediction">Prediction: -</p>
+    <script>
+        let canvas = document.getElementById('canvas');
+        let context = canvas.getContext('2d');
+        context.strokeStyle = 'white';
+        context.lineWidth = 15;
+        context.lineCap = 'round';
+
+        let drawing = false;
+
+        canvas.addEventListener('mousedown', () => drawing = true);
+        canvas.addEventListener('mouseup', () => drawing = false);
+        canvas.addEventListener('mousemove', draw);
+
+        function draw(event) {
+            if (!drawing) return;
+            context.lineTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+            context.stroke();
+        }
+
+        function predict() {
+            let image = canvas.toDataURL('image/png');
+            fetch('/predict/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ image: image })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('prediction').innerText = 'Prediction: ' + data.prediction;
+            });
+        }
+    </script>
+</body>
+</html>

@@ -104,3 +104,30 @@ def compress_image(temp_file_path):
     # Add your image compression logic here
     compressed_image_path = temp_file_path  # Placeholder, update with actual path
     return compressed_image_path
+
+
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from gradio_client import Client
+
+def predict_fraud(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+
+        client = Client("EswarKarthikk/credit_card_fraud_detection")
+        result = client.predict(
+            amt_income_total=float(data['amt_income_total']),
+            amt_credit=float(data['amt_credit']),
+            contract_type=data['contract_type'],
+            amt_annuity=float(data['amt_annuity']),
+            amt_goods_price=float(data['amt_goods_price']),
+            hour_appr_process_start=int(data['hour_appr_process_start']),
+            name_income_type=data['name_income_type'],
+            organization_type=data['organization_type'],
+            api_name="/predict_fraud"
+        )
+
+        return JsonResponse({'result': result})
+
+    return render(request, 'credit_fraud.html')

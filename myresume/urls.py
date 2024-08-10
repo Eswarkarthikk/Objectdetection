@@ -3,5 +3,6 @@ from . import views
 
 urlpatterns = [
     path('', views.upload_image, name='upload_image'),
+    path('predict_fraud/', views.predict_fraud, name='predict_fraud'),
     path('task_status/<str:task_id>/', views.task_status, name='task_status'),
 ]

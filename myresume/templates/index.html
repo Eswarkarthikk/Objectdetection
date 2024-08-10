@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Uploaded Images</title>
     <style>
+
         /* General styles */
         body {
             font-family: Arial, sans-serif;
@@ -54,7 +55,9 @@
         }
 
         button:hover {
-            background-color: #45a049;
+            
+            background-color: #38deff;
+            color:#070018
         }
 
         /* Responsive adjustments */
@@ -66,7 +69,9 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <h1 style="align-items:center;text-align:center">
+    <button style="text-align:center"><a style="color:rgba(255, 255, 255, 0.881);text-decoration:none" href="{% url 'predict_fraud' %}">Credit card fraud detection</a></button>
+</h1><div class="container">
         <h2>Original Image</h2>
         <img id="originalImage" src="" alt="Original Image" style="display: none;">
 
@@ -77,7 +82,7 @@
         <form id="uploadForm" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="file" id="imageInput" name="image" accept="image/*" required>
-            <button type="submit">Upload</button>
+            <button type="submit" class="upload">Upload</button>
         </form>
         <div id="status"></div>
     </div>
