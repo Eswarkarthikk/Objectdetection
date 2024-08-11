@@ -19,59 +19,111 @@
 
         .container {
             background-color: #fff;
-            padding: 20px 40px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 400px;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            margin-left: 200px;
+            margin-right: 200px;
+            width: auto;
         }
 
         h1 {
             text-align: center;
             color: #004085;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            font-size: 28px;
         }
 
         form {
             display: flex;
-            flex-direction: column;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .form-group {
+            width: 45%;
+            margin-bottom: 20px;
         }
 
         label {
-            margin-bottom: 5px;
+            display: block;
+            margin-bottom: 8px;
             font-weight: bold;
+            font-size: 16px;
         }
 
         input[type="number"],
         select {
-            padding: 10px;
-            margin-bottom: 15px;
+            width: 100%;
+            padding: 15px;
             border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
+            border-radius: 8px;
+            font-size: 18px;
+            box-sizing: border-box;
+        }
+
+        .btn-container {
+            width: 100%;
+            text-align: center;
+            margin-top: 40px;
         }
 
         button {
-            padding: 10px;
+            padding: 15px 30px;
             background-color: #004085;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 18px;
             transition: background-color 0.3s ease;
+            position: relative;
         }
 
         button:hover {
             background-color: #003366;
         }
 
-        h2 {
-            color: #004085;
-            margin-top: 20px;
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
         }
 
-        p {
-            font-size: 18px;
+        .spinner {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid white;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: spin 1s linear infinite;
+        }
+
+        button.loading .spinner {
+            display: inline-block;
+        }
+
+        button.loading span {
+            visibility: hidden;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .result-container {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .result-container p {
+            font-size: 24px;
             font-weight: bold;
             color: #28a745;
         }
@@ -81,41 +133,56 @@
     <div class="container">
         <h1>Credit Card Fraud Detection</h1>
         <form id="fraudForm">
-            <label for="amt_income_total">Total Income:</label>
-            <input type="number" id="amt_income_total" name="amt_income_total" required>
+            <div class="form-group">
+                <label for="amt_income_total">Total Income:</label>
+                <input type="number" id="amt_income_total" name="amt_income_total" value="0" required>
+            </div>
 
-            <label for="amt_credit">Credit Amount:</label>
-            <input type="number" id="amt_credit" name="amt_credit" required>
+            <div class="form-group">
+                <label for="amt_credit">Credit Amount:</label>
+                <input type="number" id="amt_credit" name="amt_credit" value="0" required>
+            </div>
 
-            <label for="contract_type">Contract Type:</label>
-            <select id="contract_type" name="contract_type" required>
-                <option value="Cash loans">Cash loans</option>
-                <option value="Revolving loans">Revolving loans</option>
-            </select>
+            <div class="form-group">
+                <label for="contract_type">Contract Type:</label>
+                <select id="contract_type" name="contract_type" required>
+                    <option value="Cash loans">Cash loans</option>
+                    <option value="Revolving loans">Revolving loans</option>
+                </select>
+            </div>
 
-            <label for="amt_annuity">Annuity Amount:</label>
-            <input type="number" id="amt_annuity" name="amt_annuity" required>
+            <div class="form-group">
+                <label for="amt_annuity">Annuity Amount:</label>
+                <input type="number" id="amt_annuity" name="amt_annuity" value="0" required>
+            </div>
 
-            <label for="amt_goods_price">Goods Price:</label>
-            <input type="number" id="amt_goods_price" name="amt_goods_price" required>
+            <div class="form-group">
+                <label for="amt_goods_price">Goods Price:</label>
+                <input type="number" id="amt_goods_price" name="amt_goods_price" value="0" required>
+            </div>
 
-            <label for="hour_appr_process_start">Hour of Process Start:</label>
-            <input type="number" id="hour_appr_process_start" name="hour_appr_process_start" required>
+            <div class="form-group">
+                <label for="hour_appr_process_start">Hour of Process Start:</label>
+                <input type="number" id="hour_appr_process_start" name="hour_appr_process_start" value="0" required>
+            </div>
 
-            <label for="name_income_type">Income Type:</label>
-            <select id="name_income_type" name="name_income_type" required>
-                <option value="Businessman">Businessman</option>
-                <option value="Commercial associate">Commercial associate</option>
-                <option value="Maternity leave">Maternity leave</option>
-                <option value="Pensioner">Pensioner</option>
-                <option value="State servant">State servant</option>
-                <option value="Student">Student</option>
-                <option value="Unemployed">Unemployed</option>
-                <option value="Working">Working</option>
-            </select>
+            <div class="form-group">
+                <label for="name_income_type">Income Type:</label>
+                <select id="name_income_type" name="name_income_type" required>
+                    <option value="Businessman">Businessman</option>
+                    <option value="Commercial associate">Commercial associate</option>
+                    <option value="Maternity leave">Maternity leave</option>
+                    <option value="Pensioner">Pensioner</option>
+                    <option value="State servant">State servant</option>
+                    <option value="Student">Student</option>
+                    <option value="Unemployed">Unemployed</option>
+                    <option value="Working">Working</option>
+                </select>
+            </div>
 
-            <label for="organization_type">Organization Type:</label>
-            <select id="organization_type" name="organization_type" required>
+            <div class="form-group">
+                <label for="organization_type">Organization Type:</label>
+                <select id="organization_type" name="organization_type" required>
                 <option value="Advertising">Advertising</option>
                 <option value="Agriculture">Agriculture</option>
                 <option value="Bank">Bank</option>
@@ -175,41 +242,59 @@
                 <option value="University">University</option>
                 <option value="XNA">XNA</option>
             </select>
+        </div>
 
-            <button type="button" onclick="submitForm()">Submit</button>
-        </form>
+        <div class="btn-container">
+            <button type="button" id="submitBtn" onclick="submitForm()">
+                <span>Submit</span>
+                <div class="spinner"></div>
+            </button>
+        </div>
+    </form>
 
+    <div class="result-container">
         <h2>Prediction Result:</h2>
         <p id="result"></p>
     </div>
+</div>
 
-    <script>
-        function submitForm() {
-            const formData = {
-                amt_income_total: document.getElementById('amt_income_total').value,
-                amt_credit: document.getElementById('amt_credit').value,
-                contract_type: document.getElementById('contract_type').value,
-                amt_annuity: document.getElementById('amt_annuity').value,
-                amt_goods_price: document.getElementById('amt_goods_price').value,
-                hour_appr_process_start: document.getElementById('hour_appr_process_start').value,
-                name_income_type: document.getElementById('name_income_type').value,
-                organization_type: document.getElementById('organization_type').value,
-            };
+<script>
+    function submitForm() {
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
 
-            fetch('/predict_fraud/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify(formData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('result').textContent = `Prediction: ${data.prediction}`;
-            })
-            .catch(error => console.error('Error:', error));
-        }
-    </script>
+        const formData = {
+            amt_income_total: document.getElementById('amt_income_total').value,
+            amt_credit: document.getElementById('amt_credit').value,
+            contract_type: document.getElementById('contract_type').value,
+            amt_annuity: document.getElementById('amt_annuity').value,
+            amt_goods_price: document.getElementById('amt_goods_price').value,
+            hour_appr_process_start: document.getElementById('hour_appr_process_start').value,
+            name_income_type: document.getElementById('name_income_type').value,
+            organization_type: document.getElementById('organization_type').value,
+        };
+
+        fetch('/predict_fraud/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('result').textContent = `Prediction: ${data.prediction}`;
+            submitBtn.classList.remove('loading');
+            submitBtn.disabled = false;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            submitBtn.classList.remove('loading');
+            submitBtn.disabled = false;
+        });
+    }
+</script>
 </body>
 </html>

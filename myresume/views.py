@@ -105,12 +105,13 @@ def compress_image(temp_file_path):
     compressed_image_path = temp_file_path  # Placeholder, update with actual path
     return compressed_image_path
 
-
 import json
 from django.http import JsonResponse
+from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from gradio_client import Client
 
+@csrf_exempt
 def predict_fraud(request):
     if request.method == "POST":
         data = json.loads(request.body)
@@ -127,7 +128,53 @@ def predict_fraud(request):
             organization_type=data['organization_type'],
             api_name="/predict_fraud"
         )
+        print(result)
 
-        return JsonResponse({'result': result})
+        return JsonResponse({'prediction': result})
 
     return render(request, 'credit_fraud.html')
+
+import base64
+import tempfile
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from gradio_client import Client, handle_file
+
+@csrf_exempt
+def predict(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        image_data = data.get('image')
+        if image_data:
+            try:
+                # Remove the header part of the base64 data
+                image_data = image_data.split(',')[1]
+                
+                # Decode the base64 image data
+                image_bytes = base64.b64decode(image_data)
+                
+                # Save the decoded image data to a temporary file
+                temp_file_path = save_t_file(image_bytes)
+                
+                # Send the file to the prediction model
+                client = Client("EswarKarthikk/digit_recognition")
+                result = client.predict(
+                    image={"background": handle_file(temp_file_path), "layers": [], "composite": None},
+                    api_name="/predict"
+                )
+                
+                return JsonResponse({'result': result})
+            except Exception as e:
+                return JsonResponse({'error': f'Error processing image: {str(e)}'}, status=500)
+        return JsonResponse({'error': 'No image data provided'}, status=400)
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+def save_t_file(image_data):
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp_file:
+        temp_file.write(image_data)
+        temp_file_path = temp_file.name
+    return temp_file_path
+
+def opendigit(request):
+    return render(request,'digit recognition.html')
