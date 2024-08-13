@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Disease Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            margin-left: 200px;
+            margin-right: 200px;
+            width: auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #dc3545;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        form {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .form-group {
+            width: 45%;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 18px;
+            box-sizing: border-box;
+        }
+
+        .btn-container {
+            width: 100%;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        button {
+            padding: 15px 30px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+            position: relative;
+        }
+
+        button:hover {
+            background-color: #c82333;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid white;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: spin 1s linear infinite;
+        }
+
+        button.loading .spinner {
+            display: inline-block;
+        }
+
+        button.loading span {
+            visibility: hidden;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .result-container {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .result-container p {
+            font-size: 24px;
+            font-weight: bold;
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Heart Disease Detection</h1>
+        <form id="heartDiseaseForm">
+            <div class="form-group">
+                <label for="age">Age:</label>
+                <input type="number" id="age" name="age" value="0" required>
+            </div>
+
+            <div class="form-group">
+                <label for="sex">Sex (1=Male, 0=Female):</label>
+                <input type="number" id="sex" name="sex" value="0" required>
+            </div>
+
+            <div class="form-group">
+                <label for="chest_pain_type">Chest Pain Type:</label>
+                <input type="number" id="chest_pain_type" name="chest_pain_type" value="0" required>
+            </div>
+
+            <div class="form-group">
+                <label for="resting_bp">Resting Blood Pressure:</label>
+                <input type="number" id="resting_bp" name="resting_bp" value="0" required>
+            </div>
+
+            <div class="form-group">
+                <label for="cholesterol">Cholesterol:</label>
+                <input type="number" id="cholesterol" name="cholesterol" value="0" required>
+            </div>
+
+            <div class="form-group">
+                <label for="fasting_blood_sugar">Fasting Blood Sugar (1=True, 0=False):</label>
+                <input type="number" id="fasting_blood_sugar" name="fasting_blood_sugar" value="0" required>
+            </div>
+
+            <div class="form-group">
+                <label for="resting_ecg">Resting ECG:</label>
+                <input type="number" id="resting_ecg" name="resting_ecg" value="0" required>
+            </div>
+
+            <div class="form-group">
+                <label for="max_heart_rate">Max Heart Rate:</label>
+                <input type="number" id="max_heart_rate" name="max_heart_rate" value="0" required>
+            </div>
+
+            <div class="form-group">
+                <label for="exercise_angina">Exercise Angina (1=Yes, 0=No):</label>
+                <input type="number" id="exercise_angina" name="exercise_angina" value="0" required>
+            </div>
+
+            <div class="form-group">
+                <label for="oldpeak">Oldpeak:</label>
+                <input type="number" id="oldpeak" name="oldpeak" value="0" required>
+            </div>
+
+            <div class="form-group">
+                <label for="st_slope">ST Slope:</label>
+                <input type="number" id="st_slope" name="st_slope" value="0" required>
+            </div>
+
+            <div class="btn-container">
+                <button type="button" id="submitBtn" onclick="submitForm()">
+                    <span>Submit</span>
+                    <div class="spinner"></div>
+                </button>
+            </div>
+        </form>
+
+        <div class="result-container">
+            <h2>Prediction Result:</h2>
+            <p id="result"></p>
+        </div>
+    </div>
+
+    <script>
+        function submitForm() {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+
+            const formData = {
+                age: document.getElementById('age').value,
+                sex: document.getElementById('sex').value,
+                chest_pain_type: document.getElementById('chest_pain_type').value,
+                resting_bp: document.getElementById('resting_bp').value,
+                cholesterol: document.getElementById('cholesterol').value,
+                fasting_blood_sugar: document.getElementById('fasting_blood_sugar').value,
+                resting_ecg: document.getElementById('resting_ecg').value,
+                max_heart_rate: document.getElementById('max_heart_rate').value,
+                exercise_angina: document.getElementById('exercise_angina').value,
+                oldpeak: document.getElementById('oldpeak').value,
+                st_slope: document.getElementById('st_slope').value,
+            };
+
+            fetch('/predict_heart_disease/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').textContent = data.result;
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+            })
+            .catch(error => {
+                document.getElementById('result').textContent = 'Error: ' + error;
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>

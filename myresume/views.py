@@ -178,3 +178,33 @@ def save_t_file(image_data):
 
 def opendigit(request):
     return render(request,'digit recognition.html')
+
+import json
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from gradio_client import Client
+
+@csrf_exempt
+def predict_heart_disease(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+
+        client = Client("Edwardhuero/Heart_Disease")
+        result = client.predict(
+            age=int(data['age']),
+            sex=int(data['sex']),
+            chest_pain_type=int(data['chest_pain_type']),
+            resting_bp=int(data['resting_bp']),
+            cholesterol=int(data['cholesterol']),
+            fasting_blood_sugar=int(data['fasting_blood_sugar']),
+            resting_ecg=int(data['resting_ecg']),
+            max_heart_rate=int(data['max_heart_rate']),
+            exercise_angina=int(data['exercise_angina']),
+            oldpeak=float(data['oldpeak']),
+            st_slope=int(data['st_slope']),
+            api_name="/predict"
+        )
+        return JsonResponse({'result': result})
+
+    return render(request, 'heart_disease.html')
